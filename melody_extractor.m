@@ -44,7 +44,7 @@ else
     raw_short = raw(startSec*fs+1:(startSec+duration)*fs+1,1);
 end
     
-if nargin < 9
+if nargin < 8
     debug = false;
 end
 
@@ -102,7 +102,7 @@ for frameNum=1:L*overlap:length(raw_short)-L
         continue
     end
     windowed = cutFrame.*window;
-    if count==3 && debug
+    if count==10 && debug
         fig_num = fig_num+1;
         figure(fig_num)
         clf
@@ -114,11 +114,13 @@ for frameNum=1:L*overlap:length(raw_short)-L
 
     % FFT the output
     ffted = fft(windowed);
-    if count==3 && debug
+    if count==10 && debug
         fig_num = fig_num+1;
         figure(fig_num)
         plot(linspace(0,fs/2,length(ffted)/2),abs(ffted(1:length(ffted)/2)))
-        title('Example windowing after FFT')
+        title('FFT Magnitude')
+        xlim([0 5000])
+        xlabel('Frequency (Hz)')
     end
 
     % start voting
@@ -134,17 +136,28 @@ for frameNum=1:L*overlap:length(raw_short)-L
     phon = ffted_A*coeff;
     weightedVotingPower = (10.^((phon-40)*0.030103));
 
+    if count==10 && debug
+        fig_num = fig_num+1;
+        figure(fig_num)
+        plot(linspace(0,fs/2,length(ffted)/2),weightedVotingPower)
+        title('After Sone Conversion')
+        xlim([0 5000])
+        xlabel('Frequency (Hz)')
+    end
+    
     % vote
     votes = zeros(num_voters,1);
     for i=votableVoterFirst:votableVoterLast
         freqBit = freqMap>lowerBoundaries(i) & freqMap<upperBoundaries(i);
         votes(i) = sum(freqBit.*weightedVotingPower);
     end
-    if count==3 && debug
+    if count==10 && debug
         fig_num = fig_num+1;
         figure(fig_num)
         plot(noteFreq,votes)
         title('Note Votes')
+        xlim([0 5000])
+        xlabel('Frequency (Hz)')
     end
 
     % total the votes according to note name
@@ -152,11 +165,13 @@ for frameNum=1:L*overlap:length(raw_short)-L
     for i=1:12
         vote_total(i) = sum(votes(i:12:end));
     end
-    if count==3 && debug
+    if count==10 && debug
         fig_num = fig_num+1;
         figure(fig_num)
         plot(vote_total)
         title('Note Name Votes')
+        str = {'A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'};
+        set(gca, 'XTickLabel',str, 'XTick',[1:12]);
     end
 
     % figure out which frequencies survive
@@ -227,16 +242,18 @@ for frameNum=1:L*overlap:length(raw_short)-L
     else
         surviving_ffted = [surviving_ffted; 0; fliplr(surviving_ffted)];
     end
-    if debug && count==3
+    if debug && count==10
         freqz = linspace(0,fs/2,length(ffted)/2);
         fig_num = fig_num+1;
         figure(fig_num)
         clf
         hold on
         plot(freqz,weightedVotingPower)
-        plot(freqz,surviving_freqs*max(abs(weightedVotingPower))/2)
+        plot(freqz,surviving_freqs.*abs(weightedVotingPower))
         title('Surviving Notes Frequency')
+        xlabel('Frequency (Hz)')
         xlim([0 5000])
+        legend('FFT Magnitude','Extracted Frequencies for Output');
     end
     
     new_signal(frameNum+1:frameNum+L) ...
@@ -252,5 +269,5 @@ end
 % normalize the output
 new_signal = new_signal/max(new_signal);
 
-audiowrite(strcat('output.mp4'),new_signal,fs)
+audiowrite(strcat('output.m4a'),new_signal,fs)
 end
