@@ -252,5 +252,5 @@ end
 % normalize the output
 new_signal = new_signal/max(new_signal);
 
-audiowrite(strcat('output_',strtok(filename,'.'),'.m4a'),new_signal,fs)
+audiowrite(strcat('output.mp4'),new_signal,fs)
 end
