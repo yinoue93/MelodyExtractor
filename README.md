@@ -41,7 +41,7 @@ After the most dominant note is determined, the output signal is constructed usi
 
 ## Result
 Example outputs are listed on this 
-[webpage](yinoue93.github.io/blob/master/MelodyExtractor.html).
+[webpage](https://yinoue93.github.io/MelodyExtractor.html).
 
 ## melody_extractor.m
 Main file.
