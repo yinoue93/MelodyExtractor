@@ -40,6 +40,8 @@ After the most dominant note is determined, the output signal is constructed usi
 <img src="surviving.png" width="400">
 
 ## Result
+Example outputs are listed on this 
+[webpage](yinoue93.github.io/blob/master/MelodyExtractor.html).
 
 ## melody_extractor.m
 Main file.
