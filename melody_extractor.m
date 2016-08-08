@@ -8,7 +8,7 @@ function [] = melody_extractor(filename,extraction_type,remove_index,...
 % extraction_type 
 %     Defines what to extract. Set remove_index if this is set to be 'remove'
 %     can be: remove | add_all_octaves | add_all_lower_octaves |
-%             add_only_one_note | add_neighbor_octaves
+%             add_only_one_note | add_neighbor_octaves | add_voice_range
 % remove_index
 %     should be populated if the extraction_type is 'remove'
 % instrFreqLow, instrFreqHigh
@@ -90,14 +90,19 @@ freqMapLog = log10(freqMap);
 
 votableVoterFirst = min(find(noteFreq>instrFreqLow));
 votableVoterLast = max(find(noteFreq<instrFreqHigh));
+lowerSing = min(find(noteFreq>110));
+upperSing = max(find(noteFreq<1200));
 
 new_signal = zeros(size(raw_short));
 count = 0;
 voteHistory = [];
+prevMaxNoteInd = 1;
+voteMax = 0;
 for frameNum=1:L*overlap:length(raw_short)-L
+    frameNumInt = floor(frameNum);
     count = count+1;
     % apply the window
-    cutFrame = raw_short(frameNum+1:frameNum+L);
+    cutFrame = raw_short(frameNumInt+1:frameNumInt+L);
     if unique(cutFrame)==0
         continue
     end
@@ -188,6 +193,12 @@ for frameNum=1:L*overlap:length(raw_short)-L
         end
     else
         [val,maxNoteInd] = max(votes);
+        if val<voteMax/20
+            maxNoteInd = prevMaxNoteInd;
+        else
+            voteMax = max(voteMax,val);
+        end
+        
         if length(voteHistory)<10
             voteHistory = [voteHistory,maxNoteInd];
             ind = mod(maxNoteInd,12);
@@ -212,7 +223,7 @@ for frameNum=1:L*overlap:length(raw_short)-L
             surviving_notes = maxNoteInd;
         
         elseif strcmp(extraction_type,'add_neighbor_octaves')
-            % include that note and one octive up/down
+            % include that note and one octave up/down
             surviving_notes = maxNoteInd;
             if maxNoteInd>12
                 surviving_notes = [surviving_notes maxNoteInd-12];
@@ -220,6 +231,11 @@ for frameNum=1:L*overlap:length(raw_short)-L
             if maxNoteInd+12<=length(lowerBoundaries)
                 surviving_notes = [surviving_notes maxNoteInd+12];
             end
+            
+        elseif strcmp(extraction_type,'add_voice_range')
+            % include octaves of the note that is between A1-A5 Hz
+            surviving_notes = (lowerSing-mod(lowerSing,12))+ind:12:upperSing;
+            
         end
         % convert the surviving notes to surviving frequencies
         % also, shape the frequencies so it doesn't sound so harsh
@@ -256,8 +272,10 @@ for frameNum=1:L*overlap:length(raw_short)-L
         legend('FFT Magnitude','Extracted Frequencies for Output');
     end
     
-    new_signal(frameNum+1:frameNum+L) ...
-        = new_signal(frameNum+1:frameNum+L)+real(ifft(surviving_ffted));
+    new_signal(frameNumInt+1:frameNumInt+L) ...
+        = new_signal(frameNumInt+1:frameNumInt+L)+real(ifft(surviving_ffted));
+    
+    prevMaxNoteInd = maxNoteInd;
 end
 
 if debug
