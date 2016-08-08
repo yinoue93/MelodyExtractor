@@ -58,11 +58,15 @@ Arguments Details:
  extraction_type 
      Defines what to extract. Set remove_index if this is set to be 'remove'
      can be: remove | add_all_octaves | add_all_lower_octaves |
+<<<<<<< f0274dce4dfc10a075a6dbfa3d5a820d2fcdac9a
 <<<<<<< HEAD
              add_only_one_note | add_neighbor_octaves
 =======
              add_only_one_note | add_neighbor_octaves | add_voice_range
 >>>>>>> master
+=======
+             add_only_one_note | add_neighbor_octaves | add_voice_range
+>>>>>>> added a new option
  remove_index
      should be populated if the extraction_type is 'remove'
  instrFreqLow, instrFreqHigh
