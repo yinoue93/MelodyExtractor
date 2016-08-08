@@ -40,11 +40,14 @@ After the most dominant note is determined, the output signal is constructed usi
 <img src="surviving.png" width="400">
 
 ## Result
+<<<<<<< HEAD
 <<<<<<< a971c473d9143b6ea0ee36bb59e56e19059fb7e4
 Example outputs are listed on this 
 [webpage](https://yinoue93.github.io/MelodyExtractor.html).
 =======
 >>>>>>> added a new option
+=======
+>>>>>>> master
 
 ## melody_extractor.m
 Main file.
@@ -55,7 +58,11 @@ Arguments Details:
  extraction_type 
      Defines what to extract. Set remove_index if this is set to be 'remove'
      can be: remove | add_all_octaves | add_all_lower_octaves |
+<<<<<<< HEAD
              add_only_one_note | add_neighbor_octaves
+=======
+             add_only_one_note | add_neighbor_octaves | add_voice_range
+>>>>>>> master
  remove_index
      should be populated if the extraction_type is 'remove'
  instrFreqLow, instrFreqHigh
